@@ -2,6 +2,9 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 import time
 import pygsheets
 import os
@@ -52,13 +55,15 @@ load_dotenv()
 
 def send_error_email(error_message):
     """
-    Enviar un email cuando ocurre un error
+    Enviar un email cuando ocurre un error usando conexión SSL
     """
     logger.info("Attempting to send error notification email")
+    smtp_server = os.getenv("SMTP_SERVER")
+    smtp_port = int(os.getenv("SMTP_PORT"))
     sender_email = os.getenv("SMTP_EMAIL")
     sender_password = os.getenv("SMTP_PASSWORD")
     receiver_email = os.getenv("NOTIFICATION_EMAIL")
-    
+
     # Crear email
     message = MIMEMultipart()
     message["From"] = sender_email
@@ -76,10 +81,9 @@ def send_error_email(error_message):
     message.attach(MIMEText(body, "plain"))
     
     try:
-        # Crear sesion SMTP
-        logger.debug("Establishing SMTP connection")
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
+        # Crear sesion SMTP con SSL
+        logger.debug(f"Establishing SSL connection to {smtp_server}:{smtp_port}")
+        server = smtplib.SMTP_SSL(smtp_server, smtp_port)
         server.login(sender_email, sender_password)
         
         # Enviar email
@@ -88,6 +92,7 @@ def send_error_email(error_message):
         logger.info("Error notification email sent successfully")
     except Exception as e:
         logger.error(f"Failed to send error email: {str(e)}")
+        logger.debug(f"SMTP connection details: server={smtp_server}, port={smtp_port}, from={sender_email}, to={receiver_email}")
 
 def main():
     driver = None
@@ -99,7 +104,11 @@ def main():
         
         # Configurar Selenium con Chrome
         logger.debug("Initializing Chrome WebDriver")
-        driver = webdriver.Chrome()
+        options = Options()
+        options.add_argument('--headless')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
         # Paso 1: Ir a la página de login
         logger.info("Navigating to DUX login page")
@@ -173,8 +182,8 @@ def main():
 
 def iterate_table(driver, gc, all_clients_list):
     try:
-        logger.debug("Opening Google Sheet 'Clientes DUX'")
-        sh = gc.open('Clientes DUX')
+        logger.debug("Opening Google Sheet 'Clientes DUX - GHL Cloud Server'")
+        sh = gc.open('Clientes DUX - GHL Cloud Server')
         wks = sh[0]
         
         logger.debug("Extracting table data")

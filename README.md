@@ -6,7 +6,7 @@ This script automates the process of extracting client data from DUX ERP system 
 
 ### Error Handling and Notifications
 - Added comprehensive try-catch blocks throughout the code
-- Implemented email notification system for error reporting
+- Implemented email notification system for error reporting using SSL connection
 - Errors are now caught at both main execution and table iteration levels
 
 ### Logging System
@@ -29,12 +29,14 @@ pip install -r requirements.txt
 ```
 DUX_USERNAME=your_dux_username
 DUX_PASSWORD=your_dux_password
-SMTP_EMAIL=your_email@gmail.com
-SMTP_PASSWORD=your_app_specific_password
+SMTP_EMAIL=your_email@example.com
+SMTP_PASSWORD=your_email_password
 NOTIFICATION_EMAIL=recipient_email@example.com
+SMTP_SERVER=your.smtp.server  # default: c1850991.ferozo.com
+SMTP_PORT=465  # default: 465 for SSL
 ```
 
-3. Ensure you have the Google Sheets API credentials file (`file.json`)
+3. Ensure you have the Google Sheets API credentials file (`dux-integration-api-5f2a21be17a1.json`)
 
 ## Features
 
@@ -42,7 +44,7 @@ NOTIFICATION_EMAIL=recipient_email@example.com
 - Data extraction from client tables
 - Automatic pagination handling
 - Google Sheets integration
-- Error notification system via email
+- Error notification system via email (SSL)
 - Comprehensive logging system
 - Automatic cleanup of resources
 
@@ -61,9 +63,11 @@ The script will send email notifications when errors occur, including:
 - Stack trace
 - Timestamp of the error
 
-Note: For Gmail, you need to use an App-Specific Password rather than your regular account password.
+The email notifications are sent using a secure SSL connection to the SMTP server.
 
 ## Dependencies
 
 See `requirements.txt` for a complete list of dependencies.
 
+## Links de Interes
+- https://github.com/password123456/setup-selenium-with-chrome-driver-on-ubuntu_debian?tab=readme-ov-file#step-2-download-google-chrome-stable-package
