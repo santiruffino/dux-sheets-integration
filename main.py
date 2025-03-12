@@ -68,7 +68,7 @@ def send_error_email(error_message):
     message = MIMEMultipart()
     message["From"] = sender_email
     message["To"] = receiver_email
-    message["Subject"] = "Error en la ejecución del script DUX"
+    message["Subject"] = "Error Integración DUX - Drive"
     
     # Agregar error al body del email
     body = f"""
