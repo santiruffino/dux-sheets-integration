@@ -100,7 +100,7 @@ def main():
         logger.info("Starting DUX script execution")
         all_clients_list = []
         logger.debug("Authorizing with pygsheets")
-        gc = pygsheets.authorize(service_file="dux-integration-api-5f2a21be17a1.json")
+        gc = pygsheets.authorize(service_file="dux-integration-api-crm-3909595c1447.json")
         
         # Configurar Selenium con Chrome
         logger.debug("Initializing Chrome WebDriver")
