@@ -142,7 +142,8 @@ def main():
         yesterday = datetime.now() - timedelta(1)
         yesterdayStringDux = datetime.strftime(yesterday, "%d%m%y")
         logger.debug(f"Setting date filter to: {yesterdayStringDux}")
-        driver.find_element(By.ID, "formCabecera:j_idt1013_input").send_keys(yesterdayStringDux, Keys.RETURN)
+        driver.find_element(By.ID, "formCabecera:j_idt1013_input").send_keys(yesterdayStringDux)
+        driver.find_element(By.ID, "formCabecera:j_idt1019_input").send_keys(yesterdayStringDux, Keys.RETURN)
 
         time.sleep(7)
 
