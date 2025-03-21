@@ -148,7 +148,7 @@ def main():
 
         time.sleep(7)
 
-        driver.save_screenshot('/tmp/screenshot.png')
+        driver.save_screenshot('screenshot.png')
 
         # Paso 8: Extraer datos de la tabla
         button_next_page_disabled = False
