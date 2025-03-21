@@ -105,7 +105,7 @@ def main():
         # Configurar Selenium con Chrome
         logger.debug("Initializing Chrome WebDriver")
         options = Options()
-        options.add_argument('--headless')
+        # options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
@@ -130,6 +130,7 @@ def main():
         # Paso 4: Navegar a pagina de clientes
         logger.info("Navigating to clients page")
         driver.get("https://erp.duxsoftware.com.ar/pages/configuracion/cliente/listaClienteBeta.faces")
+        time.sleep(7)
 
         # Paso 5 y 6: Configurar fecha
         logger.debug("Configuring date filters")
