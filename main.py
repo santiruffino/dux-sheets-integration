@@ -108,6 +108,7 @@ def main():
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--window-size=1920,1080')
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
         # Paso 1: Ir a la página de login
