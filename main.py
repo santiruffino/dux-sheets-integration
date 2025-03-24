@@ -5,6 +5,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 import pygsheets
 import os
@@ -148,8 +150,17 @@ def main():
         yesterday = datetime.now() - timedelta(1)
         yesterdayStringDux = datetime.strftime(yesterday, "%d%m%y")
         logger.debug(f"Setting date filter to: {yesterdayStringDux}")
-        driver.find_element(By.ID, "formCabecera:j_idt1013_input").send_keys(yesterdayStringDux)
-        driver.find_element(By.ID, "formCabecera:j_idt1019_input").send_keys(yesterdayStringDux, Keys.RETURN)
+        wait = WebDriverWait(driver, 10)  # Espera hasta 10 segundos
+        input_element = wait.until(EC.presence_of_element_located((By.ID, "formCabecera:j_idt1013_input")))
+        print("Elemento encontrado:", input_element.is_displayed(), input_element.is_enabled())
+        input_element.click()
+        input_element.send_keys(yesterdayStringDux)
+        input_element = wait.until(EC.presence_of_element_located((By.ID, "formCabecera:j_idt1019_input")))
+        print("Elemento encontrado:", input_element.is_displayed(), input_element.is_enabled())
+        input_element.click()
+        input_element.send_keys(yesterdayStringDux, Keys.RETURN)
+        # driver.find_element(By.ID, "formCabecera:j_idt1013_input").send_keys(yesterdayStringDux)
+        # driver.find_element(By.ID, "formCabecera:j_idt1019_input").send_keys(yesterdayStringDux, Keys.RETURN)
 
         time.sleep(7)
 
