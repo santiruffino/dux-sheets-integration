@@ -155,6 +155,8 @@ def main():
         input_element.click()
         input_element.send_keys(yesterday_string_dux, Keys.RETURN)
 
+        time.sleep(5)
+
         driver.save_screenshot('screenshot2.png')
 
         # Paso 8: Extraer datos de la tabla
