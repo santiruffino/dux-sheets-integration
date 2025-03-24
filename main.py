@@ -139,6 +139,9 @@ def main():
 
         time.sleep(10)
 
+        driver.save_screenshot('screenshot1.png')
+
+
         # Paso 7: Escribir fecha y dar enter
         yesterday = datetime.now() - timedelta(1)
         yesterdayStringDux = datetime.strftime(yesterday, "%d%m%y")
@@ -148,7 +151,7 @@ def main():
 
         time.sleep(7)
 
-        driver.save_screenshot('screenshot.png')
+        driver.save_screenshot('screenshot2.png')
 
         ids = driver.find_elements(By.XPATH, '//*[@id]')
         for ii in ids:
