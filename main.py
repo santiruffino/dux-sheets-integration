@@ -143,40 +143,26 @@ def main():
 
         time.sleep(10)
 
-        driver.save_screenshot('screenshot1.png')
-
-
         # Paso 7: Escribir fecha y dar enter
         yesterday = datetime.now() - timedelta(1)
-        yesterdayStringDux = datetime.strftime(yesterday, "%d%m%y")
-        logger.debug(f"Setting date filter to: {yesterdayStringDux}")
-        wait = WebDriverWait(driver, 10)  # Espera hasta 10 segundos
+        yesterday_string_dux = datetime.strftime(yesterday, "%d%m%y")
+        logger.debug(f"Setting date filter to: {yesterday_string_dux}")
+        wait = WebDriverWait(driver, 10)
         input_element = wait.until(EC.presence_of_element_located((By.ID, "formCabecera:j_idt1013_input")))
-        print("Elemento encontrado:", input_element.is_displayed(), input_element.is_enabled())
         input_element.click()
-        input_element.send_keys(yesterdayStringDux)
+        input_element.send_keys(yesterday_string_dux)
         input_element = wait.until(EC.presence_of_element_located((By.ID, "formCabecera:j_idt1019_input")))
-        print("Elemento encontrado:", input_element.is_displayed(), input_element.is_enabled())
         input_element.click()
-        input_element.send_keys(yesterdayStringDux, Keys.RETURN)
-        # driver.find_element(By.ID, "formCabecera:j_idt1013_input").send_keys(yesterdayStringDux)
-        # driver.find_element(By.ID, "formCabecera:j_idt1019_input").send_keys(yesterdayStringDux, Keys.RETURN)
-
-        time.sleep(7)
+        input_element.send_keys(yesterday_string_dux, Keys.RETURN)
 
         driver.save_screenshot('screenshot2.png')
-
-        ids = driver.find_elements(By.XPATH, '//*[@id]')
-        for ii in ids:
-            logger.debug(f"Element ID: {ii.get_attribute('id')}")
-            # print('ID: ' + ii.get_attribute('id'))  # element id as string
 
         # Paso 8: Extraer datos de la tabla
         button_next_page_disabled = False
         page_number = 1
 
         exit()
-        
+
         logger.info("Starting data extraction from table")
         while not button_next_page_disabled:
             logger.debug(f"Processing page {page_number}")
