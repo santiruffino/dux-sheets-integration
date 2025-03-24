@@ -150,9 +150,16 @@ def main():
 
         driver.save_screenshot('screenshot.png')
 
+        ids = driver.find_elements(By.XPATH, '//*[@id]')
+        for ii in ids:
+            logger.debug(f"Element ID: {ii.get_attribute('id')}")
+            # print('ID: ' + ii.get_attribute('id'))  # element id as string
+
         # Paso 8: Extraer datos de la tabla
         button_next_page_disabled = False
         page_number = 1
+
+        exit()
         
         logger.info("Starting data extraction from table")
         while not button_next_page_disabled:
