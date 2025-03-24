@@ -157,13 +157,9 @@ def main():
 
         time.sleep(5)
 
-        driver.save_screenshot('screenshot2.png')
-
         # Paso 8: Extraer datos de la tabla
         button_next_page_disabled = False
         page_number = 1
-
-        exit()
 
         logger.info("Starting data extraction from table")
         while not button_next_page_disabled:
