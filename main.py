@@ -121,7 +121,7 @@ def main():
         # Paso 2: Ingresar credenciales
         logger.debug("Entering login credentials")
         driver.find_element(By.ID, "formLogin:inputUsuario").send_keys(os.getenv("DUX_USERNAME"))
-        driver.find_element(By.ID, "formLogin:j_idt16").send_keys(os.getenv("DUX_PASSWORD"), Keys.RETURN)
+        driver.find_element(By.ID, "formLogin:inputPassword").send_keys(os.getenv("DUX_PASSWORD"), Keys.RETURN)
 
         logger.debug("Waiting for page load after login")
         time.sleep(5)
