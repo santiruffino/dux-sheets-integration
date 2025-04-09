@@ -207,10 +207,12 @@ def iterate_table(driver, gc, all_clients_list):
                 rows_processed += 1
         
         logger.info(f"Processed {rows_processed} client rows")
-        logger.debug("Updating Google Sheet with new data")
-        wks.update_values('A2', all_clients_list)
-        logger.debug("Google Sheet update completed")
-        
+
+        if rows_processed > 0:
+            logger.debug("Updating Google Sheet with new data")
+            wks.update_values('A2', all_clients_list)
+            logger.debug("Google Sheet update completed")
+
     except Exception as e:
         error_details = traceback.format_exc()
         logger.error(f"An error occurred while iterating table: {str(e)}")
