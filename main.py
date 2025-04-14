@@ -181,6 +181,8 @@ def main():
 
         logger.info("Script execution completed successfully")
 
+    except NoRowsFoundException:
+        logger.info("Script finished: No rows found to process")
     except Exception as e:
         error_details = traceback.format_exc()
         logger.error(f"An error occurred: {str(e)}")
@@ -221,10 +223,10 @@ def iterate_table(driver, gc, all_clients_list):
         wks.update_values('A2', all_clients_list)
         logger.debug("Google Sheet update completed")
         
-    except NoRowsFoundException as e:
-        logger.warning(str(e))
-        send_error_email(f"Script execution stopped: {str(e)}")
-        raise  # Re-raise to stop the main execution
+    except NoRowsFoundException:
+        # Just log the warning and re-raise, without sending email
+        logger.warning("No rows found in the current page, stopping execution")
+        raise
     except Exception as e:
         error_details = traceback.format_exc()
         logger.error(f"An error occurred while iterating table: {str(e)}")
