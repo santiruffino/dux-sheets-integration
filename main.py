@@ -128,7 +128,7 @@ def main():
 
         # Paso 3: Aceptar select de sucursal
         logger.debug("Selecting branch office")
-        driver.find_element(By.ID, "formInicio:j_idt882").click()
+        driver.find_element(By.ID, "formInicio:j_idt909").click()
         time.sleep(5)
 
         # Paso 4: Navegar a pagina de clientes
@@ -138,8 +138,8 @@ def main():
 
         # Paso 5 y 6: Configurar fecha
         logger.debug("Configuring date filters")
-        driver.find_element(By.ID, "formCabecera:j_idt1003_label").click()
-        driver.find_element(By.ID, "formCabecera:j_idt1003_3").click()
+        driver.find_element(By.ID, "formCabecera:j_idt1030_label").click()
+        driver.find_element(By.ID, "formCabecera:j_idt1030_3").click()
 
         time.sleep(10)
 
@@ -148,10 +148,10 @@ def main():
         yesterday_string_dux = datetime.strftime(yesterday, "%d%m%y")
         logger.debug(f"Setting date filter to: {yesterday_string_dux}")
         wait = WebDriverWait(driver, 10)
-        input_element = wait.until(EC.presence_of_element_located((By.ID, "formCabecera:j_idt1013_input")))
+        input_element = wait.until(EC.presence_of_element_located((By.ID, "formCabecera:j_idt1040_input")))
         input_element.click()
         input_element.send_keys(yesterday_string_dux)
-        input_element = wait.until(EC.presence_of_element_located((By.ID, "formCabecera:j_idt1019_input")))
+        input_element = wait.until(EC.presence_of_element_located((By.ID, "formCabecera:j_idt1046_input")))
         input_element.click()
         input_element.send_keys(yesterday_string_dux, Keys.RETURN)
 
