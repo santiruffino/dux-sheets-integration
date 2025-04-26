@@ -340,7 +340,7 @@ def upsert_contacts():
                         response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
                         log_api_request("POST", url, headers, payload, response=response)
                         
-                        if response.status_code == 200:
+                        if response.ok:
                             successful_upserts += 1
                             logger.debug(f"Successfully upserted contact {total_contacts}")
                         else:
@@ -385,7 +385,7 @@ def search_invoices():
             response_sucursales = requests.request("GET", url_sucursales, headers=headers_dux)
             log_api_request("GET", url_sucursales, headers_dux, response=response_sucursales)
             
-            if response_sucursales.status_code != 200:
+            if not response_sucursales.ok:
                 raise Exception(f"Failed to fetch branch offices. Status code: {response_sucursales.status_code}, Response: {response_sucursales.text}")
                 
             for i in response_sucursales.json():
@@ -419,7 +419,7 @@ def search_invoices():
                     response_facturas = requests.request("GET", url_facturas, headers=headers_dux, params=params)
                     log_api_request("GET", url_facturas, headers_dux, params, response=response_facturas)
                     
-                    if response_facturas.status_code != 200:
+                    if not response_facturas.ok:
                         logger.error(f"Failed to fetch invoices for branch office {item}. Status code: {response_facturas.status_code}, Response: {response_facturas.text}")
                         continue
                         
@@ -502,7 +502,7 @@ def search_invoices():
                                                                        data=json.dumps(payload_update_contact))
                                 log_api_request("PUT", url_update_contact, headers_ghl, payload_update_contact, response=response_update_contact)
                                                                        
-                                if response_update_contact.status_code == 200:
+                                if response_update_contact.ok:
                                     successful_updates += 1
                                     logger.debug(f"Successfully updated contact for invoice {j['id']}")
                                 else:
@@ -578,7 +578,7 @@ def search_contact_by_id_cliente_dux(id_cliente_dux, phone="", email=""):
             response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
             log_api_request("POST", url, headers, payload, response=response)
             
-            if response.status_code != 200:
+            if not response.ok:
                 logger.error(f"Failed to search contact. Status code: {response.status_code}, Response: {response.text}")
                 return {"contacts": []}
                 
