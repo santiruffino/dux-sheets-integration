@@ -355,6 +355,8 @@ def upsert_contacts():
                     continue
                     
             logger.info(f"Contact upsert process completed. Total contacts: {total_contacts}, Successful: {successful_upserts}")
+
+        os.remove('clients.csv')
             
     except Exception as e:
         error_details = traceback.format_exc()
@@ -615,7 +617,6 @@ def iterate_table(driver, all_clients_list):
             raise NoRowsFoundException("No rows were found to process in the current page")
 
 
-        os.remove('clients.csv')
         filename = 'clients.csv'
         with open(filename, 'w', newline='') as file:
             writer = csv.writer(file)
