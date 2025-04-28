@@ -244,6 +244,8 @@ def main():
                 logger.info("Reached last page of results")
                 button_next_page_disabled = True
 
+        search_invoices()
+
         logger.info("Script execution completed successfully")
 
     except NoRowsFoundException:
