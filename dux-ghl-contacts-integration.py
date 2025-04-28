@@ -49,7 +49,7 @@ def send_error_email(error_message):
         # Create email
         message = MIMEMultipart()
         message["From"] = sender_email
-        message["To"] = receiver_email
+        message["To"] = receiver_email.join(receiver_email)
         message["Subject"] = "Error Integración DUX - Drive"
 
         # Add error to email body with more details
