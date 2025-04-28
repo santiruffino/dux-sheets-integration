@@ -208,7 +208,7 @@ def main():
         time.sleep(10)
 
         # Paso 7: Escribir fecha y dar enter
-        yesterday = datetime.now() - timedelta(1)
+        yesterday = datetime.now()
         yesterday_string_dux = datetime.strftime(yesterday, "%d%m%y")
         logger.debug(f"Setting date filter to: {yesterday_string_dux}")
         wait = WebDriverWait(driver, 10)
