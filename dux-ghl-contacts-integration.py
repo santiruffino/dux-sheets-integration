@@ -81,10 +81,11 @@ def send_error_email(error_message):
         server.send_message(message)
         server.quit()
         logger.info("Error notification email sent successfully")
-        
+
     except Exception as e:
         logger.error(f"Failed to send error email: {str(e)}")
-        logger.debug(f"SMTP connection details: server={smtp_server}, port={smtp_port}, from={sender_email}, to={receiver_email}")
+        logger.debug(
+            f"SMTP connection details: server={smtp_server}, port={smtp_port}, from={sender_email}, to={receiver_email}")
         # Don't raise the exception here to avoid infinite recursion
 
 
@@ -269,13 +270,13 @@ def upsert_contacts():
             'Authorization': f'Bearer {os.getenv("GHL_PRIVATE_INTEGRATION_KEY")}'
         }
         url = "https://services.leadconnectorhq.com/contacts/upsert"
-        
+
         logger.debug("Reading clients.csv file")
         with open("clients.csv", "r") as file:
             csvreader = csv.reader(file)
             total_contacts = 0
             successful_upserts = 0
-            
+
             for row in csvreader:
                 total_contacts += 1
                 try:
@@ -283,7 +284,8 @@ def upsert_contacts():
                     payload = {
                         "locationId": location_id,
                         "firstName": row[csv_clients_dictionary["cliente"]],
-                        "phone": row[csv_clients_dictionary["telefono"]] if not row[csv_clients_dictionary["celular"]] else row[
+                        "phone": row[csv_clients_dictionary["telefono"]] if not row[
+                            csv_clients_dictionary["celular"]] else row[
                             csv_clients_dictionary["celular"]],
                         "customFields": [
                             {
@@ -328,7 +330,7 @@ def upsert_contacts():
                             },
                         ]
                     }
-                    
+
                     if is_valid_email(row[csv_clients_dictionary["correo_electronico"]]):
                         payload["email"] = row[csv_clients_dictionary["correo_electronico"]]
                         payload["customFields"].append({
@@ -339,25 +341,27 @@ def upsert_contacts():
                     try:
                         response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
                         log_api_request("POST", url, headers, payload, response=response)
-                        
+
                         if response.ok:
                             successful_upserts += 1
                             logger.debug(f"Successfully upserted contact {total_contacts}")
                         else:
-                            logger.error(f"Failed to upsert contact {total_contacts}. Status code: {response.status_code}, Response: {response.text}")
+                            logger.error(
+                                f"Failed to upsert contact {total_contacts}. Status code: {response.status_code}, Response: {response.text}")
                     except Exception as e:
                         log_api_request("POST", url, headers, payload, error=e)
                         logger.error(f"Error processing contact {total_contacts}: {str(e)}")
                         continue
-                        
+
                 except Exception as e:
                     logger.error(f"Error processing contact {total_contacts}: {str(e)}")
                     continue
-                    
-            logger.info(f"Contact upsert process completed. Total contacts: {total_contacts}, Successful: {successful_upserts}")
+
+            logger.info(
+                f"Contact upsert process completed. Total contacts: {total_contacts}, Successful: {successful_upserts}")
 
         os.remove('clients.csv')
-            
+
     except Exception as e:
         error_details = traceback.format_exc()
         logger.error(f"An error occurred during contact upsert process: {str(e)}")
@@ -380,19 +384,20 @@ def search_invoices():
             "accept": "application/json",
             "authorization": os.getenv("DUX_API_KEY")
         }
-        
+
         logger.debug("Fetching branch offices from DUX API")
         url_sucursales = f'https://erp.duxsoftware.com.ar/WSERP/rest/services/sucursales?idEmpresa={os.getenv("DUX_ID_EMPRESA")}'
         try:
             response_sucursales = requests.request("GET", url_sucursales, headers=headers_dux)
             log_api_request("GET", url_sucursales, headers_dux, response=response_sucursales)
-            
+
             if not response_sucursales.ok:
-                raise Exception(f"Failed to fetch branch offices. Status code: {response_sucursales.status_code}, Response: {response_sucursales.text}")
-                
+                raise Exception(
+                    f"Failed to fetch branch offices. Status code: {response_sucursales.status_code}, Response: {response_sucursales.text}")
+
             for i in response_sucursales.json():
                 ids_sucursales.append(i['id'])
-                
+
             logger.info(f"Found {len(ids_sucursales)} branch offices")
         except Exception as e:
             log_api_request("GET", url_sucursales, headers_dux, error=e)
@@ -420,11 +425,12 @@ def search_invoices():
                 try:
                     response_facturas = requests.request("GET", url_facturas, headers=headers_dux, params=params)
                     log_api_request("GET", url_facturas, headers_dux, params, response=response_facturas)
-                    
+
                     if not response_facturas.ok:
-                        logger.error(f"Failed to fetch invoices for branch office {item}. Status code: {response_facturas.status_code}, Response: {response_facturas.text}")
+                        logger.error(
+                            f"Failed to fetch invoices for branch office {item}. Status code: {response_facturas.status_code}, Response: {response_facturas.text}")
                         continue
-                        
+
                     facturas = response_facturas.json()['results']
                     logger.debug(f"Found {len(facturas)} invoices for branch office {item}")
                 except Exception as e:
@@ -440,8 +446,9 @@ def search_invoices():
                             url_update_contact = f"https://services.leadconnectorhq.com/contacts/{search_contact_result['contacts'][0]['id']}"
                             fecha = datetime.strptime(j["fecha_comp"], "%b %d, %Y %I:%M:%S %p")
                             fecha_formateada = fecha.strftime("%Y/%m/%d")
-                            logger.debug(f"Updating contact for invoice {j['id']} from branch office {response_sucursales.json()[index]['sucursal']}")
-                            
+                            logger.debug(
+                                f"Updating contact for invoice {j['id']} from branch office {response_sucursales.json()[index]['sucursal']}")
+
                             payload_update_contact = {
                                 "customFields": [
                                     {
@@ -490,7 +497,8 @@ def search_invoices():
                                     },
                                     {
                                         "key": "presupuesto_numero_dux",
-                                        "field_value": j["presupuesto"][0]["nro_presupuesto"] if j["presupuesto"] else ""
+                                        "field_value": j["presupuesto"][0]["nro_presupuesto"] if j[
+                                            "presupuesto"] else ""
                                     },
                                     {
                                         "key": "presupuesto_estado_dux",
@@ -499,31 +507,47 @@ def search_invoices():
                                 ]
                             }
 
+                            for producto in j["detalles"]:
+                                if "COMODATO" in producto["item"]:
+                                    payload_update_contact["customFields"].append({
+                                        "key": "contrata_comodato_dux",
+                                        "value": "SI"
+                                    })
+                                else:
+                                    payload_update_contact["customFields"].append({
+                                        "key": "contrata_comodato_dux",
+                                        "value": "NO"
+                                    })
+
                             try:
-                                response_update_contact = requests.request("PUT", url_update_contact, headers=headers_ghl,
-                                                                       data=json.dumps(payload_update_contact))
-                                log_api_request("PUT", url_update_contact, headers_ghl, payload_update_contact, response=response_update_contact)
-                                                                       
+                                response_update_contact = requests.request("PUT", url_update_contact,
+                                                                           headers=headers_ghl,
+                                                                           data=json.dumps(payload_update_contact))
+                                log_api_request("PUT", url_update_contact, headers_ghl, payload_update_contact,
+                                                response=response_update_contact)
+
                                 if response_update_contact.ok:
                                     successful_updates += 1
                                     logger.debug(f"Successfully updated contact for invoice {j['id']}")
                                 else:
-                                    logger.error(f"Failed to update contact for invoice {j['id']}. Status code: {response_update_contact.status_code}, Response: {response_update_contact.text}")
+                                    logger.error(
+                                        f"Failed to update contact for invoice {j['id']}. Status code: {response_update_contact.status_code}, Response: {response_update_contact.text}")
                             except Exception as e:
                                 log_api_request("PUT", url_update_contact, headers_ghl, payload_update_contact, error=e)
                                 logger.error(f"Error updating contact for invoice {j['id']}: {str(e)}")
                                 continue
-                                
+
                     except Exception as e:
                         logger.error(f"Error processing invoice {j['id']}: {str(e)}")
                         continue
-                        
+
             except Exception as e:
                 logger.error(f"Error processing branch office {item}: {str(e)}")
                 continue
-                
-        logger.info(f"Invoice search process completed. Total invoices processed: {total_invoices_processed}, Successful updates: {successful_updates}")
-        
+
+        logger.info(
+            f"Invoice search process completed. Total invoices processed: {total_invoices_processed}, Successful updates: {successful_updates}")
+
     except Exception as e:
         error_details = traceback.format_exc()
         logger.error(f"An error occurred during invoice search process: {str(e)}")
@@ -575,15 +599,16 @@ def search_contact_by_id_cliente_dux(id_cliente_dux, phone="", email=""):
                 }
             ]
         }
-        
+
         try:
             response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
             log_api_request("POST", url, headers, payload, response=response)
-            
+
             if not response.ok:
-                logger.error(f"Failed to search contact. Status code: {response.status_code}, Response: {response.text}")
+                logger.error(
+                    f"Failed to search contact. Status code: {response.status_code}, Response: {response.text}")
                 return {"contacts": []}
-                
+
             result = response.json()
             logger.debug(f"Found {len(result.get('contacts', []))} contacts matching the search criteria")
             return result
@@ -591,7 +616,7 @@ def search_contact_by_id_cliente_dux(id_cliente_dux, phone="", email=""):
             log_api_request("POST", url, headers, payload, error=e)
             logger.error(f"Error searching contact: {str(e)}")
             return {"contacts": []}
-            
+
     except Exception as e:
         logger.error(f"Error in search_contact_by_id_cliente_dux: {str(e)}")
         return {"contacts": []}
@@ -615,7 +640,6 @@ def iterate_table(driver, all_clients_list):
         if rows_processed == 0:
             logger.warning("No rows found to process, stopping execution")
             raise NoRowsFoundException("No rows were found to process in the current page")
-
 
         filename = 'clients.csv'
         with open(filename, 'w', newline='') as file:
@@ -700,20 +724,20 @@ def log_api_request(method, url, headers, payload=None, response=None, error=Non
         masked_headers = headers.copy()
         if 'Authorization' in masked_headers:
             masked_headers['Authorization'] = 'Bearer [MASKED]'
-            
+
         # Log request details
         logger.debug(f"API Request - Method: {method}, URL: {url}")
         logger.debug(f"API Request - Headers: {json.dumps(masked_headers, indent=2)}")
         if payload:
             logger.debug(f"API Request - Payload: {json.dumps(payload, indent=2)}")
-            
+
         # Log response or error
         if response:
             logger.debug(f"API Response - Status Code: {response.status_code}")
             logger.debug(f"API Response - Body: {response.text}")
         elif error:
             logger.error(f"API Error: {str(error)}")
-            
+
     except Exception as e:
         logger.error(f"Error logging API request: {str(e)}")
 
