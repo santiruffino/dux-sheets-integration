@@ -208,16 +208,16 @@ def main():
         time.sleep(10)
 
         # Paso 7: Escribir fecha y dar enter
-        yesterday = datetime.now()
-        yesterday_string_dux = datetime.strftime(yesterday, "%d%m%y")
-        logger.debug(f"Setting date filter to: {yesterday_string_dux}")
+        today = datetime.now()
+        today_string_dux = datetime.strftime(today, "%d%m%y")
+        logger.debug(f"Setting date filter to: {today_string_dux}")
         wait = WebDriverWait(driver, 10)
         input_element = wait.until(EC.presence_of_element_located((By.ID, "formCabecera:j_idt1040_input")))
         input_element.click()
-        input_element.send_keys(yesterday_string_dux)
+        input_element.send_keys(today_string_dux)
         input_element = wait.until(EC.presence_of_element_located((By.ID, "formCabecera:j_idt1046_input")))
         input_element.click()
-        input_element.send_keys(yesterday_string_dux, Keys.RETURN)
+        input_element.send_keys(today_string_dux, Keys.RETURN)
 
         time.sleep(5)
 
@@ -404,9 +404,9 @@ def search_invoices():
             raise
 
         url_facturas = "https://erp.duxsoftware.com.ar/WSERP/rest/services/facturas"
-        yesterday = datetime.now() - timedelta(1)
-        yesterday_string_dux = datetime.strftime(yesterday, "%Y-%m-%d")
-        logger.debug(f"Searching invoices for date: {yesterday_string_dux}")
+        today = datetime.now()
+        today_string_dux = datetime.strftime(today, "%Y-%m-%d")
+        logger.debug(f"Searching invoices for date: {today_string_dux}")
 
         total_invoices_processed = 0
         successful_updates = 0
@@ -415,8 +415,8 @@ def search_invoices():
             try:
                 logger.debug(f"Processing branch office {index + 1}/{len(ids_sucursales)}")
                 params = {
-                    "fechaDesde": yesterday_string_dux,
-                    "fechaHasta": yesterday_string_dux,
+                    "fechaDesde": today_string_dux,
+                    "fechaHasta": today_string_dux,
                     "idEmpresa": os.getenv("DUX_ID_EMPRESA"),
                     "idSucursal": item,
                 }
