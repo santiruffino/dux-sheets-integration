@@ -49,7 +49,7 @@ def send_error_email(error_message):
         # Create email
         message = MIMEMultipart()
         message["From"] = sender_email
-        message["To"] = receiver_email.join(receiver_email)
+        message["To"] = f"{os.getenv('NOTIFICATION_EMAIL')},{os.getenv('NOTIFICATION_EMAIL_2')}"
         message["Subject"] = "Error Integración DUX - Drive"
 
         # Add error to email body with more details
@@ -191,7 +191,7 @@ def main():
 
         # Paso 3: Aceptar select de sucursal
         logger.debug("Selecting branch office")
-        driver.find_element(By.ID, "formInicio:j_idt909").click()
+        driver.find_element(By.ID, "formInicio:j_idt910").click()
         time.sleep(5)
 
         # Paso 4: Navegar a pagina de clientes
@@ -202,8 +202,8 @@ def main():
         # Paso 5 y 6: Configurar fecha
         driver.find_element(By.CLASS_NAME, "announcekit-booster-modal-close").click()
         logger.debug("Configuring date filters")
-        driver.find_element(By.ID, "formCabecera:j_idt1030_label").click()
-        driver.find_element(By.ID, "formCabecera:j_idt1030_3").click()
+        driver.find_element(By.ID, "formCabecera:j_idt1031_label").click()
+        driver.find_element(By.ID, "formCabecera:j_idt1031_3").click()
 
         time.sleep(10)
 
@@ -212,10 +212,10 @@ def main():
         today_string_dux = datetime.strftime(today, "%d%m%y")
         logger.debug(f"Setting date filter to: {today_string_dux}")
         wait = WebDriverWait(driver, 10)
-        input_element = wait.until(EC.presence_of_element_located((By.ID, "formCabecera:j_idt1040_input")))
+        input_element = wait.until(EC.presence_of_element_located((By.ID, "formCabecera:j_idt1041_input")))
         input_element.click()
         input_element.send_keys(today_string_dux)
-        input_element = wait.until(EC.presence_of_element_located((By.ID, "formCabecera:j_idt1046_input")))
+        input_element = wait.until(EC.presence_of_element_located((By.ID, "formCabecera:j_idt1047_input")))
         input_element.click()
         input_element.send_keys(today_string_dux, Keys.RETURN)
 
