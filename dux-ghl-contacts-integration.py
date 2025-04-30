@@ -283,9 +283,10 @@ def upsert_contacts():
                 total_contacts += 1
                 try:
                     logger.debug(f"Processing contact {total_contacts}: {row[csv_clients_dictionary['cliente']]}")
+                    first_name_formatted = row[csv_clients_dictionary["cliente"]].replace(",", "").title()
                     payload = {
                         "locationId": location_id,
-                        "firstName": row[csv_clients_dictionary["cliente"]],
+                        "firstName": first_name_formatted,
                         "phone": row[csv_clients_dictionary["telefono"]] if not row[
                             csv_clients_dictionary["celular"]] else row[
                             csv_clients_dictionary["celular"]],
