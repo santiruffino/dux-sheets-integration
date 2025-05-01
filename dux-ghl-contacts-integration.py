@@ -200,7 +200,7 @@ def main():
         time.sleep(7)
 
         # Paso 5 y 6: Configurar fecha
-        driver.find_element(By.CLASS_NAME, "announcekit-booster-modal-close").click()
+        # driver.find_element(By.CLASS_NAME, "announcekit-booster-modal-close").click()
         logger.debug("Configuring date filters")
         driver.find_element(By.ID, "formCabecera:j_idt1031_label").click()
         driver.find_element(By.ID, "formCabecera:j_idt1031_3").click()
