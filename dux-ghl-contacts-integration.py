@@ -413,136 +413,151 @@ def search_invoices():
 
         total_invoices_processed = 0
         successful_updates = 0
+        limit = 50  # Number of results per page
 
         for index, item in enumerate(ids_sucursales):
             try:
                 logger.debug(f"Processing branch office {index + 1}/{len(ids_sucursales)}")
-                params = {
-                    "fechaDesde": today_string_dux,
-                    "fechaHasta": today_string_dux,
-                    "idEmpresa": os.getenv("DUX_ID_EMPRESA"),
-                    "idSucursal": item,
-                }
+                offset = 0
+                has_more_results = True
 
-                time.sleep(5)
-                try:
-                    response_facturas = requests.request("GET", url_facturas, headers=headers_dux, params=params)
-                    log_api_request("GET", url_facturas, headers_dux, params, response=response_facturas)
+                while has_more_results:
+                    params = {
+                        "fechaDesde": today_string_dux,
+                        "fechaHasta": today_string_dux,
+                        "idEmpresa": os.getenv("DUX_ID_EMPRESA"),
+                        "idSucursal": item,
+                        "limit": limit,
+                        "offset": offset
+                    }
 
-                    if not response_facturas.ok:
-                        logger.error(
-                            f"Failed to fetch invoices for branch office {item}. Status code: {response_facturas.status_code}, Response: {response_facturas.text}")
-                        continue
-
-                    facturas = response_facturas.json()['results']
-                    logger.debug(f"Found {len(facturas)} invoices for branch office {item}")
-                except Exception as e:
-                    log_api_request("GET", url_facturas, headers_dux, params, error=e)
-                    logger.error(f"Error fetching invoices for branch office {item}: {str(e)}")
-                    continue
-
-                for j in facturas:
-                    total_invoices_processed += 1
+                    time.sleep(5)  # Rate limiting
                     try:
-                        search_contact_result = search_contact_by_id_cliente_dux(j["id_cliente"])
-                        if len(search_contact_result['contacts']) > 0:
-                            url_update_contact = f"https://services.leadconnectorhq.com/contacts/{search_contact_result['contacts'][0]['id']}"
-                            fecha = datetime.strptime(j["fecha_comp"], "%b %d, %Y %I:%M:%S %p")
-                            fecha_formateada = fecha.strftime("%Y/%m/%d")
-                            logger.debug(
-                                f"Updating contact for invoice {j['id']} from branch office {response_sucursales.json()[index]['sucursal']}")
+                        response_facturas = requests.request("GET", url_facturas, headers=headers_dux, params=params)
+                        log_api_request("GET", url_facturas, headers_dux, params, response=response_facturas)
 
-                            payload_update_contact = {
-                                "customFields": [
-                                    {
-                                        "key": "id_factura_dux",
-                                        "field_value": j["id"]
-                                    },
-                                    {
-                                        "key": "numero_punto_venta_dux",
-                                        "field_value": j["nro_pto_vta"]
-                                    },
-                                    {
-                                        "key": "id_personal_dux",
-                                        "field_value": j["id_personal"]
-                                    },
-                                    {
-                                        "key": "id_vendedor_dux",
-                                        "field_value": j["id_vendedor"]
-                                    },
-                                    {
-                                        "key": "tipo_comprobante_dux",
-                                        "field_value": j["tipo_comp"]
-                                    },
-                                    {
-                                        "key": "numero_comprobante_dux",
-                                        "field_value": j["nro_comp"]
-                                    },
-                                    {
-                                        "key": "fecha_comprobante_dux",
-                                        "field_value": fecha_formateada
-                                    },
-                                    {
-                                        "key": "monto_sin_iva_dux",
-                                        "field_value": j["monto_gravado"]
-                                    },
-                                    {
-                                        "key": "monto_total_dux",
-                                        "field_value": j["total"]
-                                    },
-                                    {
-                                        "key": "nombre_sucursal_dux",
-                                        "field_value": response_sucursales.json()[index]["sucursal"]
-                                    },
-                                    {
-                                        "key": "tiene_cobro",
-                                        "field_value": "SI" if j["detalles_cobro"] else "NO"
-                                    },
-                                    {
-                                        "key": "presupuesto_numero_dux",
-                                        "field_value": j["presupuesto"][0]["nro_presupuesto"] if j[
-                                            "presupuesto"] else ""
-                                    },
-                                    {
-                                        "key": "presupuesto_estado_dux",
-                                        "field_value": j["presupuesto"][0]["estado"] if j["presupuesto"] else ""
-                                    }
-                                ]
-                            }
+                        if not response_facturas.ok:
+                            logger.error(
+                                f"Failed to fetch invoices for branch office {item}. Status code: {response_facturas.status_code}, Response: {response_facturas.text}")
+                            break
 
-                            for producto in j["detalles"]:
-                                if "COMODATO" in producto["item"]:
-                                    payload_update_contact["customFields"].append({
-                                        "key": "contrata_comodato_dux",
-                                        "value": "SI"
-                                    })
-                                else:
-                                    payload_update_contact["customFields"].append({
-                                        "key": "contrata_comodato_dux",
-                                        "value": "NO"
-                                    })
+                        response_data = response_facturas.json()
+                        facturas = response_data['results']
+                        total_results = response_data.get('total', 0)
+                        
+                        logger.debug(f"Found {len(facturas)} invoices for branch office {item} (offset: {offset}, total: {total_results})")
 
+                        for j in facturas:
+                            total_invoices_processed += 1
                             try:
-                                response_update_contact = requests.request("PUT", url_update_contact,
-                                                                           headers=headers_ghl,
-                                                                           data=json.dumps(payload_update_contact))
-                                log_api_request("PUT", url_update_contact, headers_ghl, payload_update_contact,
-                                                response=response_update_contact)
+                                search_contact_result = search_contact_by_id_cliente_dux(j["id_cliente"])
+                                if len(search_contact_result['contacts']) > 0:
+                                    url_update_contact = f"https://services.leadconnectorhq.com/contacts/{search_contact_result['contacts'][0]['id']}"
+                                    fecha = datetime.strptime(j["fecha_comp"], "%b %d, %Y %I:%M:%S %p")
+                                    fecha_formateada = fecha.strftime("%Y/%m/%d")
+                                    logger.debug(
+                                        f"Updating contact for invoice {j['id']} from branch office {response_sucursales.json()[index]['sucursal']}")
 
-                                if response_update_contact.ok:
-                                    successful_updates += 1
-                                    logger.debug(f"Successfully updated contact for invoice {j['id']}")
-                                else:
-                                    logger.error(
-                                        f"Failed to update contact for invoice {j['id']}. Status code: {response_update_contact.status_code}, Response: {response_update_contact.text}")
+                                    payload_update_contact = {
+                                        "customFields": [
+                                            {
+                                                "key": "id_factura_dux",
+                                                "field_value": j["id"]
+                                            },
+                                            {
+                                                "key": "numero_punto_venta_dux",
+                                                "field_value": j["nro_pto_vta"]
+                                            },
+                                            {
+                                                "key": "id_personal_dux",
+                                                "field_value": j["id_personal"]
+                                            },
+                                            {
+                                                "key": "id_vendedor_dux",
+                                                "field_value": j["id_vendedor"]
+                                            },
+                                            {
+                                                "key": "tipo_comprobante_dux",
+                                                "field_value": j["tipo_comp"]
+                                            },
+                                            {
+                                                "key": "numero_comprobante_dux",
+                                                "field_value": j["nro_comp"]
+                                            },
+                                            {
+                                                "key": "fecha_comprobante_dux",
+                                                "field_value": fecha_formateada
+                                            },
+                                            {
+                                                "key": "monto_sin_iva_dux",
+                                                "field_value": j["monto_gravado"]
+                                            },
+                                            {
+                                                "key": "monto_total_dux",
+                                                "field_value": j["total"]
+                                            },
+                                            {
+                                                "key": "nombre_sucursal_dux",
+                                                "field_value": response_sucursales.json()[index]["sucursal"]
+                                            },
+                                            {
+                                                "key": "tiene_cobro",
+                                                "field_value": "SI" if j["detalles_cobro"] else "NO"
+                                            },
+                                            {
+                                                "key": "presupuesto_numero_dux",
+                                                "field_value": j["presupuesto"][0]["nro_presupuesto"] if j[
+                                                    "presupuesto"] else ""
+                                            },
+                                            {
+                                                "key": "presupuesto_estado_dux",
+                                                "field_value": j["presupuesto"][0]["estado"] if j["presupuesto"] else ""
+                                            }
+                                        ]
+                                    }
+
+                                    for producto in j["detalles"]:
+                                        if "COMODATO" in producto["item"]:
+                                            payload_update_contact["customFields"].append({
+                                                "key": "contrata_comodato_dux",
+                                                "value": "SI"
+                                            })
+                                        else:
+                                            payload_update_contact["customFields"].append({
+                                                "key": "contrata_comodato_dux",
+                                                "value": "NO"
+                                            })
+
+                                    try:
+                                        response_update_contact = requests.request("PUT", url_update_contact,
+                                                                               headers=headers_ghl,
+                                                                               data=json.dumps(payload_update_contact))
+                                        log_api_request("PUT", url_update_contact, headers_ghl, payload_update_contact,
+                                                        response=response_update_contact)
+
+                                        if response_update_contact.ok:
+                                            successful_updates += 1
+                                            logger.debug(f"Successfully updated contact for invoice {j['id']}")
+                                        else:
+                                            logger.error(
+                                                f"Failed to update contact for invoice {j['id']}. Status code: {response_update_contact.status_code}, Response: {response_update_contact.text}")
+                                    except Exception as e:
+                                        log_api_request("PUT", url_update_contact, headers_ghl, payload_update_contact, error=e)
+                                        logger.error(f"Error updating contact for invoice {j['id']}: {str(e)}")
+                                        continue
+
                             except Exception as e:
-                                log_api_request("PUT", url_update_contact, headers_ghl, payload_update_contact, error=e)
-                                logger.error(f"Error updating contact for invoice {j['id']}: {str(e)}")
+                                logger.error(f"Error processing invoice {j['id']}: {str(e)}")
                                 continue
 
+                        # Check if we need to fetch more results
+                        offset += limit
+                        has_more_results = offset < total_results
+
                     except Exception as e:
-                        logger.error(f"Error processing invoice {j['id']}: {str(e)}")
-                        continue
+                        log_api_request("GET", url_facturas, headers_dux, params, error=e)
+                        logger.error(f"Error fetching invoices for branch office {item}: {str(e)}")
+                        break
 
             except Exception as e:
                 logger.error(f"Error processing branch office {item}: {str(e)}")
